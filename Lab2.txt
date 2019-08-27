@@ -1,0 +1,29 @@
+docker pull hyperledger/sawtooth-settings-tp:1.1
+docker pull hyperledger/sawtooth-intkey-tp-python:1.1
+docker pull hyperledger/sawtooth-validator:1.1
+docker pull hyperledger/sawtooth-devmode-engine-rust:1.1
+docker pull hyperledger/sawtooth-rest-api:1.1
+docker pull hyperledger/sawtooth-all:1.1
+docker images
+
+docker-compose -f $SAWTOOTH_START up -d validatorOne
+
+docker exec -it validatorOne bash
+
+sawadm keygen
+
+exit 
+
+docker-compose -f $SAWTOOTH_START up -d cli
+
+docker exec -it cli bash
+
+sawtooth keygen student
+
+ls ~/.sawtooth/keys/
+
+docker exec -it validatorOne bash
+
+export key_dir=/etc/sawtooth/keys/
+
+sawset genesis -k $key_dir/validator.priv -A $key_dir/validator.pub -o /var/lib/sawtooth/sawtooth-settings-genesis.batch

@@ -1,0 +1,18 @@
+docker exec -it validatorOne bash
+
+cd /etc/sawtooth/ && mkdir policy
+
+cd /etc/sawtooth/ && sudo touch path.toml
+
+sudo nano path.toml
+
+    log_dir = "/var/log/sawtooth"
+    data_dir = "/var/lib/sawtooth"
+    policy_dir = "/etc/sawtooth/policy"
+    key_dir = "/etc/sawtooth/keys"
+
+cd /etc/sawtooth && sudo touch cli.toml
+
+nano cli.toml
+
+url = “http://rest-api:3000”

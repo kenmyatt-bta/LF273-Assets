@@ -1,0 +1,10 @@
+docker exec -it validatorOne bash
+
+sawadm genesis /var/lib/sawtooth/sawtooth-settings-genesis.batch
+
+
+sudo sawtooth-validator -v \
+--bind "component:tcp://eth0:8000" \
+--bind "network:tcp://eth0:8080" \
+--bind "consensus:tcp://eth0:7070"
+--endpoint "tcp://validatorOne:8080"

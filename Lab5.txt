@@ -1,0 +1,14 @@
+docker-compose -f $SAWTOOTH_START up -d rest-api
+
+docker exec -it rest-api bash
+
+sawtooth-rest-api -vv -C tcp://validatorOne:8000 --bind rest-api:3000
+
+docker exec -it rest-api bash
+
+cd /etc/sawtooth
+
+touch rest-api.toml
+
+bind = ["rest-api:3000"] 
+connect = "tcp://validatorOne:8000"

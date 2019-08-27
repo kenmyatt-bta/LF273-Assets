@@ -1,0 +1,54 @@
+sudo apt update
+
+sudo apt -y upgrade
+
+sudo apt install curl
+
+sudo apt install git
+
+sudo apt update
+
+sudo apt upgrade
+
+sudo apt install apt-transport-https ca-certificates gnupg-agent software-properties-common
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
+sudo apt update
+
+sudo apt -y install docker-ce
+
+sudo usermod -aG docker student
+
+sudo curl -L https://github.com/docker/compose/releases/download/1.18.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+
+sudo chmod +x /usr/local/bin/docker-compose
+
+sudo reboot now
+
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8AA7AF1F1091A5FD
+
+sudo add-apt-repository 'deb [arch=amd64] http://repo.sawtooth.me/ubuntu/bumper/stable xenial universe'
+
+sudo apt-get update
+
+sudo apt-get install -y sawtooth python3-sawtooth-poet-engine
+
+curl --help
+git --version
+docker-compose -v 
+docker -v
+
+man python2.7
+
+sudo apt install -y python-minimal
+
+curl https://lfx-start1.s3.us-east-2.amazonaws.com/lfx273/docker-sawtooth-start.yml -o /tmp/sawtooth-start.yml
+
+nano ~/.profile
+
+export SAWTOOTH_START=/tmp/sawtooth-start.yml
+
+source ~/.profile

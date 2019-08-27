@@ -1,0 +1,88 @@
+mkdir ~/sawtoothPoet
+
+touch ~/sawtoothPoet/network.yml
+
+mkdir ~/sawtoothPoet/configtx
+cd ~/sawtoothPoet/configtx
+
+mkdir validatorA validatorB validatorC validatorD
+
+version: "2.1"
+
+services:
+
+  validatorA:
+    image: hyperledger/sawtooth-validator:1.1
+    container_name: validatorA
+
+    environment:
+      PYTHONPATH: "/project/sawtooth-core/consensus/poet/common:\
+        /project/sawtooth-core/consensus/poet/simulator:\
+        /project/sawtooth-core/consensus/poet/core"
+
+    expose:
+      - 8000
+      - 7070
+      - 8800
+
+    command: bash -c "sleep 10000"
+
+# Command for Validators B-C Only
+
+    command: bash -c "sawtooth-validator -vv --bind network:tcp://eth0:8080 --bind component:tcp://eth0:8000 --bind consensus:tcp://eth0:7070 --peering dynamic --endpoint tcp://validatorB:8080 --seeds tcp://validatorA:8800 --scheduler serial --network-auth trust"
+
+docker pull hyperledger/sawtooth-poet-engine:1.1
+docker pull hyperledger/sawtooth-poet-validator-registry-tp:1.1
+
+  engineA:
+    image: hyperledger/sawtooth-poet-engine:1.1
+    container_name: engineA
+    command:"bash -c " poet-engine -C tcp://validatorA:7070 --component tcp://validatorA:8000 "
+    
+  registryA:
+    image: hyperledger/sawtooth-poet-validator-registry-tp:1.1
+    container_name: registryA
+    command:"bash -c " sleep 10000"
+
+#For registries B,C,D
+    command:bash -c "poet-validator-registry-tp -C tcp://validatorA:8000”
+
+   expose:
+      - 8000
+
+   volumes:
+      - ./configtx/ValidatorA:/etc/sawtooth/keys
+      - ./configtx/settings:/etc/sawtooth/settings
+
+#Repeat above for all engines and registries
+
+
+  rest-apiA:
+    image: hyperledger/sawtooth-rest-api:1.1
+    container_name: rest-apiA
+    command: bash -c "sawtooth-rest-api --connect tcp://validatorA:8000 --bind rest-apiA:8008"
+    expose:
+      - 8008
+
+
+  settingsA:
+    image: hyperledger/sawtooth-settings-tp:1.1
+    container_name: settingsA
+    command: settings-tp -C tcp://validatorA:8000
+    expose:
+      - 4004
+
+  intkeyA:
+    image: hyperledger/sawtooth-intkey-tp-python:1.1
+    container_name: intkeyA
+    command: intkey-tp-python -C tcp://validatorA:8000
+    expose:
+      - 8000
+
+mv /etc/sawtooth/simulator_rk_pub.pem ~/sawtoothPoet/configtx/settings
+
+ls configtx
+
+docker rm -f devCon
+
+docker rm -f $(docker ps -aq)

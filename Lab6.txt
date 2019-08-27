@@ -1,0 +1,27 @@
+docker-compose -f $SAWTOOTH_START up -d settingsTP
+
+docker exec -it settingsTP bash
+
+settings-tp -v -C tcp://validatorOne:8000 
+
+docker-compose -f  $SAWTOOTH_START up -d intkeyTP
+
+docker exec -it intkeyTP bash
+
+intkey-tp-python -vv -C tcp://validatorOne:8000
+
+docker exec -it cli bash
+
+curl http://rest-api:3000/blocks
+
+sawtooth block list --url http://rest-api:3000 
+
+sawtooth transaction list --url http://rest-api:3000
+
+sawtooth settings list --url http://rest-api:3000
+
+sawtooth state list --url http://rest-api:3000
+
+curl http://rest-api:3000/peers
+
+sawtooth peer list --url http://rest-api:3000

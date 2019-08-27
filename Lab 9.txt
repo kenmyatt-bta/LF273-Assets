@@ -1,0 +1,65 @@
+cd ~/sawtoothPoet
+
+docker-compose -f ./network.yml up -d validatorA engineA
+
+docker exec -it validatorA bash
+
+sawset genesis -k /etc/sawtooth/keys/validator.priv -A /etc/sawtooth/keys/validator.pub -o config-genesis.batch 
+
+docker exec -it engineA bash
+
+cd /etc/sawtooth/
+
+poet registration create -o /etc/sawtooth/settings/poet.batch -k /etc/sawtooth/validator.priv
+
+poet enclave measurement > /etc/sawtooth/settings/measurement.txt
+
+poet enclave basename >  /etc/sawtooth/settings/basename.txt
+
+docker exec -it validatorA bash
+
+exit
+
+
+sawset proposal create -k /etc/sawtooth/keys/validator.priv \
+sawtooth.consensus.algorithm=poet \
+sawtooth.poet.report_public_key_pem="$(cat /etc/sawtooth/settings/simulator_rk_pub.pem)" \
+sawtooth.poet.valid_enclave_measurements=c99f21955e38dbb03d2ca838d3af6e43ef438926ed02db4cc729380c8c7a174e \
+sawtooth.poet.valid_enclave_basenames=B785c58b77152cbe7fd55ee3851c499000000000000000000000000000000000 \
+-o config.batch
+
+
+sawset proposal create -k /etc/sawtooth/keys/validator.priv \
+sawtooth.publisher.max_batches_per_block=1 \
+sawtooth.poet.target_wait_time=10 \
+sawtooth.poet.initial_wait_time=20 \
+-o poet-settings.batch
+
+sawadm genesis config-genesis.batch config.batch poet-settings.batch /etc/sawtooth/settings/poet.batch
+
+sawtooth-validator -vv --bind "component:tcp://eth0:8000" --bind "network:tcp://eth0:8800" --bind "consensus:tcp://eth0:7070" --endpoint "tcp://validatorA:8800" --scheduler serial --network-auth trust --peering dynamic
+
+docker-compose -f ./network.yml up -d rest-apiA settingsA cli
+
+docker exec -it settingsA bash
+
+settings-tp -vv -C tcp://validatorA:8000
+
+docker logs rest-apiA
+
+docker-compose -f ./network.yml up -d registryA
+
+docker exec -it engineA bash
+
+poet-engine -C tcp://validatorA:7070 --component tcp://validatorA:8000
+
+docker-compose -f ~/sawtoothPoet/network.yml up -d validatorB settingsB rest-apiB engineB registryB 
+
+docker-compose -f ~/sawtoothPoet/network.yml up -d validatorC settingsC rest-apiC engineC registryC
+
+docker-compose -f ~/sawtoothPoet/network.yml up -d validatorD settingsD rest-apiD engineD registryD
+
+docker-compose -f ~/sawtoothPoet/network.yml up -d intkeyA intkeyB intkeyC intkeyD
+
+sawtooth peer list --url http://rest-apiA:8008
+

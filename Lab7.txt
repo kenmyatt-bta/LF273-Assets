@@ -1,0 +1,20 @@
+docker-compose -f $SAWTOOTH_START up -d devEngine
+
+docker exec -it devEngine bash
+
+devmode-engine-rust -vv --connect tcp://validatorOne:7070
+
+docker exec -it validatorOne bash
+
+sawset proposal create sawtooth.validator.max_transactions_per_block=1 -k /etc/sawtooth/keys/validator.priv --url http://rest-api:3000
+
+docker exec -it cli bash
+
+sawtooth settings list --url http://rest-api:3000
+
+intkey set sample 10 -v --keyfile /root/.sawtooth/keys/student.priv --url http://rest-api:3000
+
+curl <LINK FROM ABOVE GOES HERE>
+
+sawtooth batch list --url http://rest-api:3000
+
